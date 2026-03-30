@@ -1,0 +1,40 @@
+{
+  "name": "joldi-tech-landing-page",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev -p 3000",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@emotion/is-prop-valid": "^1.4.0",
+    "clsx": "^2.1.1",
+    "firebase": "^11.0.2",
+    "firebase-admin": "^13.7.0",
+    "jose": "^6.2.2",
+    "lucide-react": "^0.468.0",
+    "motion": "^11.13.1",
+    "next": "15.1.0",
+    "nodemailer": "^8.0.4",
+    "react": "19.0.0",
+    "react-dom": "19.0.0",
+    "react-markdown": "^9.0.1",
+    "rehype-raw": "^7.0.0",
+    "remark-gfm": "^4.0.1",
+    "tailwind-merge": "^2.5.5"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.0.0-alpha.30",
+    "@types/node": "^20",
+    "@types/nodemailer": "^7.0.11",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9.39.4",
+    "eslint-config-next": "^15.1.0",
+    "postcss": "^8",
+    "tailwindcss": "^4.0.0-alpha.30",
+    "typescript": "^5"
+  }
+}

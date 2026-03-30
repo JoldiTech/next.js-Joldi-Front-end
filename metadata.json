@@ -1,0 +1,9 @@
+{
+  "name": "Joldi Tech Landing Page",
+  "description": "Next-generation technology solutions for modern businesses.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone",
+    "geolocation"
+  ]
+}

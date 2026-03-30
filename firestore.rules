@@ -1,0 +1,290 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    //
+    // Collection: leads
+    // Document ID: auto-generated
+    // Fields:
+    //   - name: string (required)
+    //   - company: string (required)
+    //   - email: string (required, email format)
+    //   - phone: string (optional)
+    //   - country: string (optional)
+    //   - employees: string (optional)
+    //   - currentServices: string (optional)
+    //   - comments: string (optional)
+    //   - createdAt: timestamp (required)
+    //
+    // ===============================================================
+
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+    
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() &&
+        'email' in request.auth.token &&
+        request.auth.token.email != null &&
+        request.auth.token.email_verified == true &&
+        (
+          (request.auth.token.email.lower() == "david@nmteaco.com") ||
+          (request.auth.token.email.lower() == "david@jolditech.com") ||
+          (exists(/databases/$(database)/documents/users/$(request.auth.token.email.lower())) && 
+           get(/databases/$(database)/documents/users/$(request.auth.token.email.lower())).data.isAdmin == true)
+        );
+    }
+
+    match /site_settings/{settingId} {
+      allow read: if true;
+      allow list: if true;
+      allow write: if isAdmin();
+    }
+
+    function isValidEmail(email) {
+      return email is string && email.size() > 3 && email.matches(".*@.*\\..*");
+    }
+
+    function isValidLead(data) {
+      let requiredFields = ['name', 'company', 'email', 'phone', 'createdAt'];
+      
+      return data.keys().hasAll(requiredFields) &&
+             data.name is string && data.name.size() > 0 && data.name.size() < 1000 &&
+             data.company is string && data.company.size() > 0 && data.company.size() < 1000 &&
+             data.email is string && isValidEmail(data.email) &&
+             data.phone is string && data.phone.size() > 0 && data.phone.size() < 1000 &&
+             data.createdAt is timestamp &&
+             (!('country' in data) || (data.country is string && data.country.size() < 1000)) &&
+             (!('employees' in data) || (data.employees is string && data.employees.size() < 1000)) &&
+             (!('currentServices' in data) || (data.currentServices is string && data.currentServices.size() < 5000)) &&
+             (!('comments' in data) || (data.comments is string && data.comments.size() < 10000)) &&
+             (!('challenge' in data) || (data.challenge is string && data.challenge.size() < 10000)) &&
+             (!('ecommerce' in data) || (data.ecommerce is string && data.ecommerce.size() < 1000)) &&
+             (!('ecommerceOther' in data) || (data.ecommerceOther is string && data.ecommerceOther.size() < 1000)) &&
+             (!('pos' in data) || (data.pos is string && data.pos.size() < 1000)) &&
+             (!('posOther' in data) || (data.posOther is string && data.posOther.size() < 1000)) &&
+             (!('helpdesk' in data) || (data.helpdesk is string && data.helpdesk.size() < 1000)) &&
+             (!('helpdeskOther' in data) || (data.helpdeskOther is string && data.helpdeskOther.size() < 1000)) &&
+             (!('hr' in data) || (data.hr is string && data.hr.size() < 1000)) &&
+             (!('hrOther' in data) || (data.hrOther is string && data.hrOther.size() < 1000)) &&
+             (!('marketing' in data) || (data.marketing is string && data.marketing.size() < 1000)) &&
+             (!('marketingOther' in data) || (data.marketingOther is string && data.marketingOther.size() < 1000)) &&
+             (!('chat' in data) || (data.chat is string && data.chat.size() < 1000)) &&
+             (!('chatOther' in data) || (data.chatOther is string && data.chatOther.size() < 1000));
+    }
+
+    function isValidStaff(data) {
+      let requiredFields = ['name', 'role', 'image', 'order'];
+      let allowedFields = ['name', 'role', 'image', 'order', 'bio', 'email', 'isAdmin'];
+      
+      return data.keys().hasAll(requiredFields) &&
+             data.keys().hasOnly(allowedFields) &&
+             data.name is string && data.name.size() > 0 && data.name.size() < 100 &&
+             data.role is string && data.role.size() > 0 && data.role.size() < 100 &&
+             data.image is string && data.image.size() > 0 && data.image.size() < 2000 &&
+             data.order is number &&
+             (!('bio' in data) || (data.bio is string && data.bio.size() < 5000)) &&
+             (!('email' in data) || (data.email is string && (data.email == "" || isValidEmail(data.email)))) &&
+             (!('isAdmin' in data) || data.isAdmin is bool);
+    }
+
+    function isValidMedia(data) {
+      let requiredFields = ['key', 'url', 'type'];
+      let allowedFields = ['key', 'url', 'type', 'title'];
+      
+      return data.keys().hasAll(requiredFields) &&
+             data.keys().hasOnly(allowedFields) &&
+             data.key is string && data.key.size() > 0 && data.key.size() < 100 &&
+             data.url is string && data.url.size() > 0 && data.url.size() < 2000 &&
+             data.type in ['image', 'video'] &&
+             (!('title' in data) || (data.title is string && data.title.size() < 200));
+    }
+
+    function isValidSolution(data) {
+      let requiredFields = ['id', 'title', 'headline', 'description', 'benefits', 'color', 'image', 'order'];
+      let allowedFields = ['id', 'title', 'headline', 'description', 'benefits', 'color', 'image', 'order', 'quote', 'pageContent', 'docId', 'icon'];
+      
+      return data.keys().hasAll(requiredFields) &&
+             data.keys().hasOnly(allowedFields) &&
+             data.id is string && data.id.size() > 0 && data.id.size() < 100 &&
+             data.title is string && data.title.size() > 0 && data.title.size() < 100 &&
+             data.headline is string && data.headline.size() > 0 && data.headline.size() < 200 &&
+             data.description is string && data.description.size() > 0 && data.description.size() < 1000 &&
+             data.benefits is list && data.benefits.size() <= 20 &&
+             data.color is string && data.color.size() > 0 && data.color.size() < 50 &&
+             data.image is string && data.image.size() > 0 && data.image.size() < 2000 &&
+             data.order is number &&
+             (!('icon' in data) || (data.icon is string && data.icon.size() < 100)) &&
+             (!('pageContent' in data) || (data.pageContent is string && data.pageContent.size() < 10000)) &&
+             (!('quote' in data) || (
+               data.quote is map &&
+               (!('oldWay' in data.quote) || (data.quote.oldWay is string && data.quote.oldWay.size() < 1000)) &&
+               (!('joldiWay' in data.quote) || (data.quote.joldiWay is string && data.quote.joldiWay.size() < 1000)) &&
+               (!('name' in data.quote) || (data.quote.name is string && data.quote.name.size() < 200)) &&
+               (!('position' in data.quote) || (data.quote.position is string && data.quote.position.size() < 200)) &&
+               (!('company' in data.quote) || (data.quote.company is string && data.quote.company.size() < 200)) &&
+               (!('thumbnail' in data.quote) || (data.quote.thumbnail is string && data.quote.thumbnail.size() < 2000))
+             ));
+    }
+
+    function isValidBasics(data) {
+      let requiredFields = ['feature', 'oldWay', 'joldiWay', 'order'];
+      return data.keys().hasAll(requiredFields) &&
+             data.feature is string && data.feature.size() < 200 &&
+             data.oldWay is string && data.oldWay.size() < 1000 &&
+             data.joldiWay is string && data.joldiWay.size() < 1000 &&
+             data.order is number;
+    }
+
+    function isValidOnlyJoldi(data) {
+      let requiredFields = ['title', 'old', 'new', 'order'];
+      return data.keys().hasAll(requiredFields) &&
+             data.title is string && data.title.size() < 200 &&
+             data.old is string && data.old.size() < 2000 &&
+             data.new is string && data.new.size() < 2000 &&
+             data.order is number;
+    }
+
+    function isValidFAQ(data) {
+      let requiredFields = ['question', 'answer', 'order'];
+      return data.keys().hasAll(requiredFields) &&
+             data.question is string && data.question.size() < 500 &&
+             data.answer is string && data.answer.size() < 2000 &&
+             data.order is number;
+    }
+
+    // ===============================================================
+    // Rules
+    // ===============================================================
+
+    match /leads/{leadId} {
+      // Allow anyone to sign up
+      allow create: if isValidLead(request.resource.data);
+      
+      // Only admins can see the leads
+      allow read: if isAdmin();
+      allow list: if isAdmin();
+      
+      // No updates or deletes for now
+      allow update, delete: if isAdmin();
+    }
+
+    match /solutions/{solutionId} {
+      allow read: if true;
+      allow list: if true;
+      allow create: if isAdmin() && isValidSolution(request.resource.data);
+      allow update: if isAdmin() && isValidSolution(request.resource.data);
+      allow delete: if isAdmin();
+    }
+
+    match /features/{featureId} {
+      allow read: if true;
+      allow list: if true;
+      allow create: if isAdmin() && isValidSolution(request.resource.data);
+      allow update: if isAdmin() && isValidSolution(request.resource.data);
+      allow delete: if isAdmin();
+    }
+
+    match /basics/{basicsId} {
+      allow read: if true;
+      allow list: if true;
+      allow create: if isAdmin() && isValidBasics(request.resource.data);
+      allow update: if isAdmin() && isValidBasics(request.resource.data);
+      allow delete: if isAdmin();
+    }
+
+    match /only_joldi/{onlyJoldiId} {
+      allow read: if true;
+      allow list: if true;
+      allow create: if isAdmin() && isValidOnlyJoldi(request.resource.data);
+      allow update: if isAdmin() && isValidOnlyJoldi(request.resource.data);
+      allow delete: if isAdmin();
+    }
+
+    match /faqs/{faqId} {
+      allow read: if true;
+      allow list: if true;
+      allow create: if isAdmin() && isValidFAQ(request.resource.data);
+      allow update: if isAdmin() && isValidFAQ(request.resource.data);
+      allow delete: if isAdmin();
+    }
+
+    match /staff/{staffId} {
+      allow read: if true;
+      allow list: if true;
+      allow create: if isAdmin() && isValidStaff(request.resource.data);
+      allow update: if isAdmin() && isValidStaff(request.resource.data);
+      allow delete: if isAdmin();
+    }
+
+    function isValidHomeCms(data) {
+      let requiredFields = ['key', 'value', 'type'];
+      let allowedFields = ['key', 'value', 'type', 'title', 'order', 'id', 'docId'];
+      
+      return data.keys().hasAll(requiredFields) &&
+             data.keys().hasOnly(allowedFields) &&
+             data.key is string && data.key.size() > 0 && data.key.size() < 100 &&
+             data.value is string && data.value.size() >= 0 && data.value.size() < 100000 &&
+             data.type in ['text', 'image', 'video', 'markdown'] &&
+             (!('title' in data) || (data.title is string && data.title.size() < 200)) &&
+             (!('order' in data) || data.order is number);
+    }
+
+    function isValidPage(data) {
+      let requiredFields = ['key', 'title', 'content'];
+      let allowedFields = ['key', 'title', 'content', 'id', 'docId'];
+      
+      return data.keys().hasAll(requiredFields) &&
+             data.keys().hasOnly(allowedFields) &&
+             data.key is string && data.key.size() > 0 && data.key.size() < 100 &&
+             data.title is string && data.title.size() > 0 && data.title.size() < 200 &&
+             data.content is string && data.content.size() >= 0 && data.content.size() < 100000;
+    }
+
+    function isValidUser(data) {
+      let requiredFields = ['email', 'isAdmin'];
+      let allowedFields = ['email', 'isAdmin', 'name', 'updatedAt'];
+      
+      return data.keys().hasAll(requiredFields) &&
+             data.keys().hasOnly(allowedFields) &&
+             data.email is string && isValidEmail(data.email) &&
+             data.isAdmin is bool &&
+             (!('name' in data) || (data.name is string && data.name.size() < 200)) &&
+             (!('updatedAt' in data) || data.updatedAt is string);
+    }
+
+    // ===============================================================
+    // Rules
+    // ===============================================================
+
+    match /pages/{pageId} {
+      allow read: if true;
+      allow list: if true;
+      allow create: if isAdmin() && isValidPage(request.resource.data);
+      allow update: if isAdmin() && isValidPage(request.resource.data);
+      allow delete: if isAdmin();
+    }
+
+    match /home_cms/{cmsId} {
+      allow read: if true;
+      allow list: if true;
+      allow create: if isAdmin() && isValidHomeCms(request.resource.data);
+      allow update: if isAdmin() && isValidHomeCms(request.resource.data);
+      allow delete: if isAdmin();
+    }
+
+    match /users/{userId} {
+      allow read: if isAuthenticated() && (request.auth.token.email.lower() == userId || isAdmin());
+      allow list: if isAdmin();
+      allow create: if isAdmin() && isValidUser(request.resource.data);
+      allow update: if isAdmin() && isValidUser(request.resource.data);
+      allow delete: if isAdmin();
+    }
+  }
+}

@@ -1,0 +1,281 @@
+{
+  "entities": {
+    "Lead": {
+      "title": "Lead",
+      "description": "Information about potential customers who signed up for early access.",
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Full name of the contact person."
+        },
+        "company": {
+          "type": "string",
+          "description": "Name of the company."
+        },
+        "email": {
+          "type": "string",
+          "format": "email",
+          "description": "The work email of the lead."
+        },
+        "phone": {
+          "type": "string",
+          "description": "Telephone number."
+        },
+        "country": {
+          "type": "string",
+          "description": "Country of operation."
+        },
+        "employees": {
+          "type": "string",
+          "description": "Number of employees."
+        },
+        "currentServices": {
+          "type": "string",
+          "description": "Services they use now."
+        },
+        "comments": {
+          "type": "string",
+          "description": "Additional comments or questions."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "The time when the lead signed up."
+        }
+      },
+      "required": ["name", "company", "email", "createdAt"]
+    },
+    "Staff": {
+      "title": "Staff",
+      "description": "Team members displayed on the site.",
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Name of the staff member."
+        },
+        "role": {
+          "type": "string",
+          "description": "Role or title of the staff member."
+        },
+        "image": {
+          "type": "string",
+          "description": "URL of the staff member's photo."
+        },
+        "fit": {
+          "type": "string",
+          "enum": ["cover", "contain", "fill", "none", "scale-down"],
+          "description": "How the image should fit its container."
+        },
+        "position": {
+          "type": "string",
+          "enum": ["center", "top", "bottom", "left", "right", "top left", "top right", "bottom left", "bottom right"],
+          "description": "The alignment of the image within its container."
+        },
+        "bio": {
+          "type": "string",
+          "description": "Short biography or description of the staff member (supports Markdown and <b> for blue bold)."
+        },
+        "order": {
+          "type": "number",
+          "description": "Order in which to display the staff member."
+        },
+        "email": {
+          "type": "string",
+          "format": "email",
+          "description": "Email address for admin access."
+        },
+        "isAdmin": {
+          "type": "boolean",
+          "description": "Whether this staff member has admin access."
+        }
+      },
+      "required": ["name", "role", "image", "order"]
+    },
+    "User": {
+      "title": "User",
+      "description": "User profile and permissions.",
+      "type": "object",
+      "properties": {
+        "email": { "type": "string", "format": "email" },
+        "isAdmin": { "type": "boolean" },
+        "name": { "type": "string" }
+      },
+      "required": ["email", "isAdmin"]
+    },
+    "Media": {
+      "title": "Media",
+      "description": "Images and videos used across the site.",
+      "type": "object",
+      "properties": {
+        "key": {
+          "type": "string",
+          "description": "Unique key identifying the media location (e.g., 'hero', 'explainer_video')."
+        },
+        "url": {
+          "type": "string",
+          "description": "URL of the image or video."
+        },
+        "type": {
+          "type": "string",
+          "enum": ["image", "video"],
+          "description": "Type of media."
+        },
+        "title": {
+          "type": "string",
+          "description": "Optional title for the media item."
+        }
+      },
+      "required": ["key", "url", "type"]
+    },
+    "Feature": {
+      "title": "Feature",
+      "description": "Main product features with associated quotes.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string" },
+        "headline": { "type": "string" },
+        "description": { "type": "string" },
+        "benefits": { "type": "array", "items": { "type": "string" } },
+        "color": { "type": "string" },
+        "image": { "type": "string" },
+        "fit": {
+          "type": "string",
+          "enum": ["cover", "contain", "fill", "none", "scale-down"],
+          "description": "How the image should fit its container."
+        },
+        "position": {
+          "type": "string",
+          "enum": ["center", "top", "bottom", "left", "right", "top left", "top right", "bottom left", "bottom right"],
+          "description": "The alignment of the image within its container."
+        },
+        "order": { "type": "number" },
+        "quote": {
+          "type": "object",
+          "properties": {
+            "oldWay": { "type": "string" },
+            "joldiWay": { "type": "string" },
+            "name": { "type": "string" },
+            "position": { "type": "string" },
+            "company": { "type": "string" },
+            "thumbnail": { "type": "string" }
+          }
+        }
+      },
+      "required": ["id", "title", "headline", "description", "benefits", "color", "image", "order"]
+    },
+    "Basics": {
+      "title": "Basics",
+      "description": "The Basics: Consolidation section items.",
+      "type": "object",
+      "properties": {
+        "feature": { "type": "string" },
+        "oldWay": { "type": "string" },
+        "joldiWay": { "type": "string" },
+        "order": { "type": "number" }
+      },
+      "required": ["feature", "oldWay", "joldiWay", "order"]
+    },
+    "OnlyJoldi": {
+      "title": "Only Joldi",
+      "description": "What Only Joldi Can Do section items.",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "old": { "type": "string" },
+        "new": { "type": "string" },
+        "order": { "type": "number" }
+      },
+      "required": ["title", "old", "new", "order"]
+    },
+    "FAQ": {
+      "title": "FAQ",
+      "description": "Frequently Asked Questions.",
+      "type": "object",
+      "properties": {
+        "question": { "type": "string" },
+        "answer": { "type": "string" },
+        "order": { "type": "number" }
+      },
+      "required": ["question", "answer", "order"]
+    },
+    "Page": {
+      "title": "Page",
+      "description": "Custom pages like Privacy Policy and Terms of Service.",
+      "type": "object",
+      "properties": {
+        "key": { "type": "string" },
+        "title": { "type": "string" },
+        "content": { "type": "string" }
+      },
+      "required": ["key", "title", "content"]
+    },
+    "HomeCms": {
+      "title": "Home CMS",
+      "description": "General content items for the home page.",
+      "type": "object",
+      "properties": {
+        "key": { "type": "string" },
+        "value": { "type": "string" },
+        "title": { "type": "string" },
+        "type": { "type": "string", "enum": ["text", "image", "video", "markdown"] },
+        "fit": {
+          "type": "string",
+          "enum": ["cover", "contain", "fill", "none", "scale-down"],
+          "description": "How the image should fit its container (only for type='image')."
+        },
+        "position": {
+          "type": "string",
+          "enum": ["center", "top", "bottom", "left", "right", "top left", "top right", "bottom left", "bottom right"],
+          "description": "The alignment of the image within its container (only for type='image')."
+        },
+        "order": { "type": "number" }
+      },
+      "required": ["key", "value", "type"]
+    }
+  },
+  "firestore": {
+    "/pages/{pageId}": {
+      "schema": "Page",
+      "description": "Collection of custom pages."
+    },
+    "/leads/{leadId}": {
+      "schema": "Lead",
+      "description": "Collection of early access leads."
+    },
+    "/staff/{staffId}": {
+      "schema": "Staff",
+      "description": "Collection of team members."
+    },
+    "/media/{mediaId}": {
+      "schema": "Media",
+      "description": "Collection of site media (images and videos)."
+    },
+    "/features/{featureId}": {
+      "schema": "Feature",
+      "description": "Collection of product features."
+    },
+    "/basics/{basicsId}": {
+      "schema": "Basics",
+      "description": "Collection of basics consolidation items."
+    },
+    "/only_joldi/{onlyJoldiId}": {
+      "schema": "OnlyJoldi",
+      "description": "Collection of unique joldi capabilities."
+    },
+    "/faqs/{faqId}": {
+      "schema": "FAQ",
+      "description": "Collection of FAQs."
+    },
+    "/home_cms/{cmsId}": {
+      "schema": "HomeCms",
+      "description": "Collection of general home page content."
+    },
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "Collection of user profiles and permissions."
+    }
+  }
+}
